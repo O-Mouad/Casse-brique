@@ -10,16 +10,29 @@ from typing import Tuple, Optional
 
 
 class Balle:
+    
     """Classe représentant la balle du casse-briques.
 
-    Conçue pour être utilisée avec Tkinter (un `tk.Canvas`), mais
-    indépendante de l'affichage : expose `update()` pour la physique
-    et `draw(canvas)` pour l'affichage.
+    Attributs: - la position de la balle (posX, posY)
+    - la vitesse de la balle (vitX, vitY)
+    - l'acceleration de la balle (aX, aY)
+    - le rayon de la balle (rayon)
+    - la vie de la balle (vie)
+    - la couleur de la balle (couleur)
+
+    ensuite on a tout les setter pour pouvoir modifier les attributs tout au long du jeu 
+
+    Fonctions : - position 
+    - de la velocity de la balle 
+    - update cad met a jour la position de la balle 
+    - draw qui afffiche la balle 
+    - reset qui remet la balle à la pos et à la vitesse initiale 
+    - intersects_rect qui teste la collision entre la balle et un rectangle (paddle ou brique)
     """
 
     def __init__(self,
                  pos: Tuple[float, float] = (0.0, 0.0),
-                 vel: Tuple[float, float] = (0.0, 0.0),
+                 vit: Tuple[float, float] = (0.0, 0.0),
                  acc: Tuple[float, float] = (0.0, 0.0),
                  rayon: int = 8,
                  vie: int = 1,
@@ -27,8 +40,8 @@ class Balle:
         self.vie: int = vie
         self.posX: float = float(pos[0])
         self.posY: float = float(pos[1])
-        self.vitX: float = float(vel[0])
-        self.vitY: float = float(vel[1])
+        self.vitX: float = float(vit[0])
+        self.vitY: float = float(vit[1])
         self.aX: float = float(acc[0])
         self.aY: float = float(acc[1])
 
@@ -38,7 +51,8 @@ class Balle:
         self._canvas_id: Optional[int] = None
 
     def pos(self, x: float, y: float) -> None:
-        """Place la balle à la position (x, y)."""
+        """Place la balle à la position (x, y).
+        """
         self.posX = float(x)
         self.posY = float(y)
 
@@ -48,13 +62,19 @@ class Balle:
         self.vitY = float(vy)
 
     def update(self, dt: float, bounds: Tuple[int, int]) -> None:
+        
         """Met à jour la position et gère les collisions simples contre
         les bords du canevas.
 
         - dt : pas de temps en secondes
         - bounds : (largeur, hauteur) du canevas
         """
-        # appliquer accélération
+        # protéger dt raisonnable
+        if dt <= 0:
+            return
+
+        # appliquer accélération (système de coordonnées : origine en haut-gauche,
+        # y positif vers le bas — donc aY positive fera accélérer vers le bas)
         self.vitX += self.aX * dt
         self.vitY += self.aY * dt
 
@@ -64,7 +84,7 @@ class Balle:
 
         largeur, hauteur = bounds
 
-        # collisions gauche/droite
+        # collisions gauche/droite (rebond simple)
         if self.posX - self.rayon < 0:
             self.posX = self.rayon
             self.vitX = -self.vitX
@@ -73,21 +93,19 @@ class Balle:
             self.posX = largeur - self.rayon
             self.vitX = -self.vitX
 
-        # collision haut
+        # collision haut (rebond vers le bas)
         if self.posY - self.rayon < 0:
             self.posY = self.rayon
             self.vitY = -self.vitY
 
-        # si la balle est passée en dessous du bas, on décrémente la vie
+        # si la balle dépasse le bas du canevas -> perte de vie
         if self.posY - self.rayon > hauteur:
             self.vie -= 1
 
     def draw(self, canvas) -> None:
         """Dessine ou met à jour la représentation de la balle sur un tk.Canvas.
-
-        Si `canvas` n'est pas un Canvas (p.ex. lors de tests), la méthode
-        échoue silencieusement.
-        """
+        
+        """ 
         x0 = self.posX - self.rayon
         y0 = self.posY - self.rayon
         x1 = self.posX + self.rayon
@@ -110,7 +128,7 @@ class Balle:
         self.vitX, self.vitY = float(vel[0]), float(vel[1])
 
     def intersects_rect(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
-        """Teste la collision cercle-rectangle (approximation AABB).
+        """Teste la collision cercle-brique (approximation AABB).
 
         Renvoie True si la balle intersecte le rectangle défini par
         (rx, ry, rwidth, rheight).
@@ -121,3 +139,46 @@ class Balle:
         dx = self.posX - closest_x
         dy = self.posY - closest_y
         return (dx * dx + dy * dy) <= (self.rayon * self.rayon)
+
+    def rebond_brique(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
+        
+        """Si la balle intersecte le rectangle, ajuste la vitesse pour simuler
+        un rebond et retourne True. Utilise une logique simple:
+
+        - détecte le côté de contact par la plus petite distance entre le
+          centre de la balle et le bord du rectangle.
+        - inverse la composante de vitesse correspondante.
+
+        Retourne False si pas d'intersection.
+        """
+        
+        if not self.intersects_rect(rx, ry, rwidth, rheight):
+            return False
+
+        # coordonnées du point le plus proche (déjà calculées dans intersects_rect
+        # mais recalculées ici pour simplicité)
+        closest_x = max(rx, min(self.posX, rx + rwidth))
+        closest_y = max(ry, min(self.posY, ry + rheight))
+
+        dx = self.posX - closest_x
+        dy = self.posY - closest_y
+
+        # déterminer côté de rebond par la plus petite distance normalisée
+        # si |dx| > |dy| alors on rebondit horizontalement (inverser vitX)
+        
+        if abs(dx) > abs(dy):
+            self.vitX = -self.vitX
+            # pousser la balle hors du rectangle d'une petite marge
+            if dx > 0:
+                self.posX = rx + rwidth + self.rayon # à droite
+            else:
+                self.posX = rx - self.rayon # à gauche
+        else:
+            self.vitY = -self.vitY # rebond vertical
+            # pousser la balle hors du rectangle d'une petite marge
+            if dy > 0:
+                self.posY = ry + rheight + self.rayon # en bas
+            else:
+                self.posY = ry - self.rayon # en haut
+
+        return True # rebond effectué
