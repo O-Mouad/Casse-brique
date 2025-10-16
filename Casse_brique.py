@@ -1,7 +1,7 @@
 """ 
 Mouad Ouamane 
 TP4 du 09/10/2025
-Ce fichier sera celui qui contiendra des tests pour comprendre tkinter
+Ce fichier contient les tests pour comprendre tkinter
 """
 
 
