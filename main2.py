@@ -47,6 +47,3 @@ caneva.create_window(500, 250, window=subtitle)
 caneva.create_window(500, 350, window=play_button)
 
 Fenetre.mainloop()
-
-
-
