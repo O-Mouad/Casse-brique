@@ -37,7 +37,8 @@ color = [
 def jeu(dif):
     print("jeu")
     caneva.delete("all")
-    caneva.config(bg="#2E003E")  
+    caneva.config(bg="#2E003E")
+  
     briques = []
 
     # Paramètres d'affichage
@@ -46,23 +47,122 @@ def jeu(dif):
     marge = 10  # espace entre les briques
     offset_y = 5  # distance du haut de l'écran
 
-
     for ligne in range(nb_lignes):
-        for col in range(nb_par_ligne):
+        for col in range(nb_par_ligne): # 9 briques par ligne
             x = marge + col * (100 + marge)
             y = offset_y + ligne * (20 + marge)
-            brique = Brique(x, y, couleur =color[ligne])
+            brique = Brique(x, y, couleur=color[ligne % len(color)])
             brique.afficher(caneva)
             briques.append(brique)
 
     pad = Pad(caneva, 440, 650)  # position au bas de l’écran
     pad.afficher()
-    # Bind touches clavier
-    Fenetre.bind("<KeyPress-Left>", pad.start_move_left)
-    Fenetre.bind("<KeyRelease-Left>", pad.stop_move_left)
-    Fenetre.bind("<KeyPress-Right>", pad.start_move_right)
-    Fenetre.bind("<KeyRelease-Right>", pad.stop_move_right)
+
+    # Création de la balle avec rayon connu
+    balle = Balle(rayon=10, couleur="white")  # rayon visible
+
+    # Position : centrée sur le pad, au-dessus (centre X du pad)
+    balle_x = pad.x + pad.largeur / 2
+    balle_y = pad.y - balle.rayon - 1  # -1 pour éviter un léger recouvrement
+    balle.pos(balle_x, balle_y)
+
+    # Affichage initial de la balle
+    balle.draw(caneva)
+
+    # state: ball starts attached to the pad
+    ball_attached = True
+
+    # Affichage initial de la balle
+    balle.draw(caneva)
+
+    # gestion des touches clavier
+
+    def lancer(direction: str): # Lancer la balle selon la touche appuyée
+        nonlocal ball_attached
+        if not ball_attached:  # si la balle est déjà en mvt ne rien faire
+            return
+        vx = -180.0 if direction == "left" else 180.0 
+        vy = -300.0
+        balle.set_velocity(vx, vy)
+        ball_attached = False
+
+    def fleche_gauche(event=None):  # déplacer le pad à gauche avec la fleche de gauche
+        pad.start_move_left(event)
+        lancer("left")
+
+    def fleche_droite(event=None): # déplacer le pad à droite avec la fleche de droite
+        pad.start_move_right(event)
+        lancer("right")
+
+    def relacher_gauche(event=None): # arrêter le déplacement
+        pad.stop_move_left(event)
+
+    def relacher_droite(event=None): # arrêter le déplacement
+        pad.stop_move_right(event)
+
+    Fenetre.bind("<KeyPress-Left>", fleche_gauche)
+    Fenetre.bind("<KeyRelease-Left>", relacher_gauche)
+    Fenetre.bind("<KeyPress-Right>", fleche_droite)
+    Fenetre.bind("<KeyRelease-Right>", relacher_droite)
+
+    # Boucle de jeu : update physics, collisions et redraw
+    def game_loop():
+        nonlocal ball_attached
+        dt = 1 / 60.0  # approximativement 60 FPS
+
+        if ball_attached:
+            # garde la balle au centre du pad
+            balle.pos(pad.x + pad.largeur / 2, pad.y - balle.rayon - 1)
+        else:
+            # mise à jour de la physique qui sont dans balle.py
+            balle.update(dt, (largeur, hauteur))
+
+            # collision entre le pad et la balle 
+            balle.rebond_brique(pad.x, pad.y, pad.largeur, pad.hauteur)
+
+            # collision briques : si rebond contre une brique -> suppression
+            for b in briques[:]:
+                if balle.rebond_brique(b.x, b.y, b.largeur, b.hauteur):
+                    if b.id is not None:
+                        caneva.delete(b.id)
+                    try:
+                        briques.remove(b)
+                    except ValueError:
+                        pass
+
+    
+        balle.draw(caneva)
+
+        # continuer ou afficher game over si vies épuisées
+        if balle.vie > 0:
+            Fenetre.after(int(dt * 1000), game_loop)
+        else:           
+            # Fond semi-transparent
+            caneva.create_rectangle(0, 0, largeur, hauteur, fill="#000000", stipple="gray50")
+
+            # Message principal
+            caneva.create_text(largeur // 2, hauteur // 2 - 30,
+                       text="GAME OVER",
+                       fill="#FF0000",
+                       font=("Helvetica", 64, "bold"))
+
+            # Message secondaire humoristique
+            caneva.create_text(largeur // 2, hauteur // 2 + 40,
+                       text="Tu pues le chameau mort 🐫💀",
+                       fill="white",
+                       font=("Helvetica", 28, "italic"))
+
+            # Bouton pour relancer (optionnel)
+            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu(15))
+            caneva.create_window(largeur // 2, hauteur // 2 + 100, window=retry_button)
+
+
+    # start updates
     pad.update()
+    game_loop()
+    # debug print
+    print("balle pos:", balle.posX, balle.posY)
+    print("items sur canvas:", len(caneva.find_all()))
     
 
 (largeur,hauteur) =(1000,700)
