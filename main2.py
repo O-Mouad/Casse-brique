@@ -13,7 +13,9 @@ from classes.balle import Balle
 
 def jeu():
     print("jeu")
-
+    caneva.delete("all")
+    caneva.config(bg="#2E003E")  
+    
 
 
 (largeur,hauteur) =(1000,700)
