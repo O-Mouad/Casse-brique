@@ -15,10 +15,14 @@ class Pad:
             self.x, self.y, self.x + self.largeur, self.y + self.hauteur, fill=self.couleur
         )
     def move_left(self, event=None):
-        self.canvas.move(self.id, -self.vitesse, 0)
+        if (self.x > 0):
+            self.canvas.move(self.id, -self.vitesse, 0)
+            self.x -= self.vitesse
 
     def move_right(self, event=None):
-        self.canvas.move(self.id, self.vitesse, 0)
+        if (self.x < 1000):
+            self.canvas.move(self.id, self.vitesse, 0)
+            self.x += self.vitesse
 
     def get_coords(self):
         return self.canvas.coords(self.id)

@@ -85,7 +85,7 @@ caneva.pack(fill="both", expand=True)
 
 title = tk.Label(Fenetre , text="Casse-briques",)
 subtitle = tk.Label(Fenetre, text="Appuie sur 'Jouer' pour commencer",)
-play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(15))
+play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(10))
 
 # Placer les widgets sur le canevas
 caneva.create_window(500, 150, window=title)
