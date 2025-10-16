@@ -1,14 +1,14 @@
 import tkinter as tk
 
 class Pad:
-    def __init__(self, canvas, x, y, largeur=120, hauteur=20, couleur="blue"):
+    def __init__(self, canvas, x, y, vitesse = 15, largeur=120, hauteur=20, couleur="blue"):
         self.canvas = canvas
         self.x = x 
         self.y = y
         self.largeur = largeur
         self.hauteur = hauteur
         self.couleur = couleur
-        self.vitesse = 15  # déplacement par touche
+        self.vitesse = vitesse  # déplacement par touche
         self.id = None
         self.moving_left = False
         self.moving_right = False
@@ -20,7 +20,7 @@ class Pad:
     def start_move_left(self, event=None):
         self.moving_left = True
 
-    def stop_move_left(self, event=None):
+    def stop_move_left(self, event=None):   
         self.moving_left = False
 
     def start_move_right(self, event=None):
