@@ -10,12 +10,49 @@ from PIL import Image, ImageTk
 from classes.briques import Brique
 from classes.balle import Balle
 
+color = [
+    "#FF595E",  # rouge vif
+    "#FF924C",  # orange clair
+    "#FFCA3A",  # jaune
+    "#8AC926",  # vert clair
+    "#1982C4",  # bleu
+    "#6A4C93",  # violet
+    "#C03221",  # rouge foncé
+    "#0FA3B1",  # turquoise
+    "#A29BFE",  # lavande
+    "#FFD6E0",  # rose pâle
+    "#F9844A",  # orange doux
+    "#43AA8B",  # vert menthe
+    "#577590",  # bleu gris
+    "#FF70A6",  # rose vif
+    "#FF9770",  # pêche
+    "#70D6FF",  # bleu ciel
+    "#B5E48C",  # vert lime clair
+    "#9B5DE5",  # violet flashy
+    "#F15BB5",  # rose magenta
+    "#FEE440"   # jaune fluo
+]
 
-def jeu():
+def jeu(dif):
     print("jeu")
     caneva.delete("all")
     caneva.config(bg="#2E003E")  
-    
+    briques = []
+
+    # Paramètres d'affichage
+    nb_lignes = dif
+    nb_par_ligne = 9
+    marge = 10  # espace entre les briques
+    offset_y = 5  # distance du haut de l'écran
+
+
+    for ligne in range(nb_lignes):
+        for col in range(nb_par_ligne):
+            x = marge + col * (100 + marge)
+            y = offset_y + ligne * (20 + marge)
+            brique = Brique(x, y, couleur =color[ligne])
+            brique.afficher(caneva)
+            briques.append(brique)
 
 
 (largeur,hauteur) =(1000,700)
@@ -41,7 +78,7 @@ caneva.pack(fill="both", expand=True)
 
 title = tk.Label(Fenetre , text="Casse-briques",)
 subtitle = tk.Label(Fenetre, text="Appuie sur 'Jouer' pour commencer",)
-play_button = tk.Button(Fenetre, text="Jouer", command=jeu)
+play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(5))
 
 # Placer les widgets sur le canevas
 caneva.create_window(500, 150, window=title)
