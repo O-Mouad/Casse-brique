@@ -9,6 +9,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from classes.briques import Brique
 from classes.balle import Balle
+from classes.pad import Pad
 
 color = [
     "#FF595E",  # rouge vif
@@ -54,6 +55,12 @@ def jeu(dif):
             brique.afficher(caneva)
             briques.append(brique)
 
+    pad = Pad(caneva, 440, 650)  # position au bas de l’écran
+    pad.afficher()
+    # Bind touches clavier
+    Fenetre.bind("<Left>", pad.move_left)
+    Fenetre.bind("<Right>", pad.move_right)
+
 
 (largeur,hauteur) =(1000,700)
 
@@ -78,7 +85,7 @@ caneva.pack(fill="both", expand=True)
 
 title = tk.Label(Fenetre , text="Casse-briques",)
 subtitle = tk.Label(Fenetre, text="Appuie sur 'Jouer' pour commencer",)
-play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(5))
+play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(15))
 
 # Placer les widgets sur le canevas
 caneva.create_window(500, 150, window=title)
