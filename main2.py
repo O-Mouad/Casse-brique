@@ -58,9 +58,12 @@ def jeu(dif):
     pad = Pad(caneva, 440, 650)  # position au bas de l’écran
     pad.afficher()
     # Bind touches clavier
-    Fenetre.bind("<Left>", pad.move_left)
-    Fenetre.bind("<Right>", pad.move_right)
-
+    Fenetre.bind("<KeyPress-Left>", pad.start_move_left)
+    Fenetre.bind("<KeyRelease-Left>", pad.stop_move_left)
+    Fenetre.bind("<KeyPress-Right>", pad.start_move_right)
+    Fenetre.bind("<KeyRelease-Right>", pad.stop_move_right)
+    pad.update()
+    
 
 (largeur,hauteur) =(1000,700)
 
