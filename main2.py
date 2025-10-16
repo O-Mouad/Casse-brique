@@ -86,6 +86,8 @@ def jeu(dif):
         balle.set_velocity(vx, vy)
         ball_attached = False
 
+
+"""inutile !! deja gerer dans la classe PAD ! 
     def fleche_gauche(event=None):  # déplacer le pad à gauche avec la fleche de gauche
         pad.start_move_left(event)
         lancer("left")
@@ -98,7 +100,7 @@ def jeu(dif):
         pad.stop_move_left(event)
 
     def relacher_droite(event=None): # arrêter le déplacement
-        pad.stop_move_right(event)
+        pad.stop_move_right(event)"""
 
     Fenetre.bind("<KeyPress-Left>", fleche_gauche)
     Fenetre.bind("<KeyRelease-Left>", relacher_gauche)
