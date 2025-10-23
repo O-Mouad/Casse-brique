@@ -14,6 +14,7 @@ A faire : - le systeme de vie de la balle
 Amélioration : ajouter des méthodes pour la balle
 """
 from typing import Tuple, Optional
+import random
 
 
 class Balle:
@@ -149,17 +150,13 @@ class Balle:
 
     
     def rebond_brique(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
-         """Si la balle intersecte le rectangle, ajuste la vitesse pour simuler
-        un rebond et retourne True. Utilise une logique simple:
+        """ Si la balle intersecte le rectangle, on ajuste la vitesse pour simuler un rebond.
+    - détecte le côté de contact par la plus petite distance entre le centre de la balle et le bord du rectangle.
+    - inverse la composante de vitesse correspondante après un rebond.
+    Retourne False si pas d'intersection.
+    """
 
-        - détecte le côté de contact par la plus petite distance entre le
-          centre de la balle et le bord du rectangle.
-        - inverse la composante de vitesse correspondante.
-
-        Retourne False si pas d'intersection.
-        """
-        
-         if not self.collisions_balle(rx, ry, rwidth, rheight):
+        if not self.collisions_balle(rx, ry, rwidth, rheight):
             return False
 
         # coordonnées du point le plus proche (déjà calculées dans intersects_rect
@@ -171,30 +168,31 @@ class Balle:
 
         # déterminer côté de rebond par la plus petite distance normalisée
         # si |dx| > |dy| alors on rebondit horizontalement (inverser vitX)
-        
         if abs(dx) > abs(dy):
             self.vitX = -self.vitX
+            # Ajouter une variation aléatoire à la vitesse Y
+            self.vitY += random.uniform(-500, 500)
             # pousser la balle hors du rectangle d'une petite marge
             if dx > 0:
-                self.posX = rx + rwidth + self.rayon # à droite
+                self.posX = rx + rwidth + self.rayon  # à droite
             else:
-                self.posX = rx - self.rayon # à gauche
+                self.posX = rx - self.rayon  # à gauche
         else:
-            self.vitY = -self.vitY # rebond vertical
+            self.vitY = -self.vitY  # rebond vertical
+            # Ajouter une variation aléatoire à la vitesse X
+            self.vitX += random.uniform(-500, 500)
             # pousser la balle hors du rectangle d'une petite marge
             if dy > 0:
-                self.posY = ry + rheight + self.rayon # en bas
+                self.posY = ry + rheight + self.rayon  # en bas
             else:
-                self.posY = ry - self.rayon # en haut
-
-        return True # rebond effectué
-
-
-
-
-
-
-"""Casse briques de Sacha BARGOIN & Mouâd OUAMANE 
+                self.posY = ry - self.rayon  # en haut
+        return True  # rebond effectué
+    
+    
+    
+    
+    
+    """Casse briques de Sacha BARGOIN & Mouâd OUAMANE 
 
 A faire fichier dans main2.py : 
   - rajouter un piles & files pour gerer les niveaux et les scores mais aussi un systeme de vie
