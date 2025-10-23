@@ -109,45 +109,47 @@ class Balle:
 
     def affichage(self, canvas) -> None:
         """Dessine ou met à jour la représentation de la balle sur un tk.Canvas.
-        
-        """ 
-        x0 = self.posX - self.rayon
+        """
+        x0 = self.posX - self.rayon 
         y0 = self.posY - self.rayon
         x1 = self.posX + self.rayon
         y1 = self.posY + self.rayon
 
-        if self._canvas_id is None:
-            try:
+        if self._canvas_id is None: # si la balle n'est pas dessinée 
+            try: # essayer de la dessiner
                 self._canvas_id = canvas.create_oval(x0, y0, x1, y1, fill=self.couleur, outline=self.couleur)
-            except Exception:
+            except Exception: # en cas d'erreur ( par exemple le canvas n'existe pas ) 
                 self._canvas_id = None
         else:
-            try:
-                canvas.coords(self._canvas_id, x0, y0, x1, y1)
+            try: # mettre à jour la position de la balle existante
+                canvas.coords(self._canvas_id, x0, y0, x1, y1) # on met à jour les coordonnées 
             except Exception:
                 self._canvas_id = None
 
+    
     def reset(self, pos: Tuple[float, float], vel: Tuple[float, float] = (0.0, 0.0)) -> None:
-        """Réinitialise la position et la vitesse de la balle."""
+        """Réinitialise la position et la vitesse de la balle.
+        """
         self.posX, self.posY = float(pos[0]), float(pos[1])
         self.vitX, self.vitY = float(vel[0]), float(vel[1])
 
+    
     def collisions_balle(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
         """Teste la collision cercle-brique.
 
         Renvoie True si la balle intersecte le rectangle défini par
         (rx, ry, rwidth, rheight).
         """
-        closest_x = max(rx, min(self.posX, rx + rwidth))
-        closest_y = max(ry, min(self.posY, ry + rheight))
-
-        dx = self.posX - closest_x
-        dy = self.posY - closest_y
+        closest_x = max(rx, min(self.posX, rx + rwidth)) # coordonnée x du point le plus proche
+        closest_y = max(ry, min(self.posY, ry + rheight)) # coordonnée y du point le plus proche 
+       
+        dx = self.posX - closest_x  # distance en x entre le center de la balle et le point le plus proche 
+        dy = self.posY - closest_y  # même chose en y 
         return (dx * dx + dy * dy) <= (self.rayon * self.rayon)
 
+    
     def rebond_brique(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
-        
-        """Si la balle intersecte le rectangle, ajuste la vitesse pour simuler
+         """Si la balle intersecte le rectangle, ajuste la vitesse pour simuler
         un rebond et retourne True. Utilise une logique simple:
 
         - détecte le côté de contact par la plus petite distance entre le
@@ -157,14 +159,13 @@ class Balle:
         Retourne False si pas d'intersection.
         """
         
-        if not self.collisions_balle(rx, ry, rwidth, rheight):
+         if not self.collisions_balle(rx, ry, rwidth, rheight):
             return False
 
         # coordonnées du point le plus proche (déjà calculées dans intersects_rect
         # mais recalculées ici pour simplicité)
-        closest_x = max(rx, min(self.posX, rx + rwidth))
+        closest_x = max(rx, min(self.posX, rx + rwidth)) 
         closest_y = max(ry, min(self.posY, ry + rheight))
-
         dx = self.posX - closest_x
         dy = self.posY - closest_y
 
@@ -187,6 +188,9 @@ class Balle:
                 self.posY = ry - self.rayon # en haut
 
         return True # rebond effectué
+
+
+
 
 
 
