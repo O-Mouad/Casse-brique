@@ -6,10 +6,12 @@ fichier main
 """
 import os
 import tkinter as tk
+import tkinter.font as tkFont
 from PIL import Image, ImageTk
 from classes.briques import Brique
 from classes.balle import Balle
 from classes.pad import Pad
+
 
 color = [
     "#F80008",  # rouge vif
@@ -34,8 +36,12 @@ color = [
     "#F4E374"   # jaune fluo
 ]
 
-def jeu(dif):
-    print("jeu")
+"""fonction jeu : gère tout le déroulement de la partie une fois le jeu lancé , 
+"""
+
+def jeu():
+    dif = curseur.get()
+
     caneva.delete("all")
     caneva.config(bg="#2E003E")
   
@@ -154,7 +160,7 @@ def jeu(dif):
                        font=("Helvetica", 28, "italic"))
 
             # Bouton pour relancer (optionnel)
-            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu(15))
+            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu())
             caneva.create_window(largeur // 2, hauteur // 2 + 100, window=retry_button)
 
 
@@ -178,18 +184,28 @@ image_pil = Image.open(image_path)
 image_redim = image_pil.resize((largeur, hauteur), Image.Resampling.LANCZOS)
 image_tk = ImageTk.PhotoImage(image_redim)  # Conversion pour Tkinter
 
+
 # Canvas pour le fond
 caneva = tk.Canvas(Fenetre, width=largeur, height=hauteur)
 caneva.create_image(0, 0, anchor="nw", image =image_tk)
 caneva.pack(fill="both", expand=True)
 
-title = tk.Label(Fenetre , text="Casse-briques",)
+caneva.create_text(500, 150, text="CASSE BRIQUES DU FUTURE", fill="white",font =("Lucida Console", 24))
 subtitle = tk.Label(Fenetre, text="Appuie sur 'Jouer' pour commencer",)
-play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(10))
+texte = tk.Label(Fenetre, text="difficulté du jeu:")
+play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu())
+
+curseur = tk.Scale(
+    caneva,             # parent
+    from_=1, to=15,      # bornes
+    orient='horizontal', # orientation
+    length=300,          # longueur du slider 
+    )
 
 # Placer les widgets sur le canevas
-caneva.create_window(500, 150, window=title)
 caneva.create_window(500, 250, window=subtitle)
+caneva.create_window(500, 600, window=texte)
 caneva.create_window(500, 350, window=play_button)
+caneva.create_window(500, 650, window=curseur)
 
 Fenetre.mainloop()
