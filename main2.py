@@ -3,6 +3,11 @@ Mouad Ouamane
 Sacha Bargoin 
 TP4 09/10/2025
 fichier main
+
+A faire : -rajouter un piles & files pour gerer les niveaux et les scores mais aussi un systeme de vie
+- ameliorer le design
+- ameliorer la gestion des collisions
+- faire en sorte que le caneva s'adapte a la taille de l'ecran
 """
 import os
 import tkinter as tk
@@ -67,13 +72,13 @@ def jeu(dif):
     balle.pos(balle_x, balle_y)
 
     # Affichage initial de la balle
-    balle.draw(caneva)
+    balle.affichage(caneva)
 
     # state: ball starts attached to the pad
     ball_attached = True
 
     # Affichage initial de la balle
-    balle.draw(caneva)
+    balle.affichage(caneva)
 
     # gestion des touches clavier
 
@@ -83,7 +88,7 @@ def jeu(dif):
             return
         vx = -180.0 if direction == "left" else 180.0 
         vy = -300.0
-        balle.set_velocity(vx, vy)
+        balle.set_vitesse(vx, vy)
         ball_attached = False
 
 
@@ -132,7 +137,7 @@ def jeu(dif):
                         pass
 
     
-        balle.draw(caneva)
+        balle.affichage(caneva)
 
         # continuer ou afficher game over si vies épuisées
         if balle.vie > 0:
@@ -154,7 +159,7 @@ def jeu(dif):
                        font=("Helvetica", 28, "italic"))
 
             # Bouton pour relancer (optionnel)
-            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu(15))
+            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu(5))
             caneva.create_window(largeur // 2, hauteur // 2 + 100, window=retry_button)
 
 
@@ -185,7 +190,7 @@ caneva.pack(fill="both", expand=True)
 
 title = tk.Label(Fenetre , text="Casse-briques",)
 subtitle = tk.Label(Fenetre, text="Appuie sur 'Jouer' pour commencer",)
-play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(10))
+play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu(5))
 
 # Placer les widgets sur le canevas
 caneva.create_window(500, 150, window=title)

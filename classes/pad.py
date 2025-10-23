@@ -1,6 +1,6 @@
 import tkinter as tk
 
- """Classe représentant la raquette du casse-briques.
+"""Classe représentant la raquette du casse-briques.
 
     Attributs: 
     - les coordonnées du pad 
@@ -19,7 +19,7 @@ import tkinter as tk
 
 
 class Pad:
-    def __init__(self, canvas, x, y, vitesse = 10, largeur=120, hauteur=20, couleur="blue"):
+    def __init__(self, canvas, x, y, vitesse = 5, largeur=120, hauteur=20, couleur="blue"):
         self.canvas = canvas
         self.x = x 
         self.y = y
