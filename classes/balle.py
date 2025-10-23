@@ -14,6 +14,7 @@ A faire : - le systeme de vie de la balle
 Amélioration : ajouter des méthodes pour la balle
 """
 from typing import Tuple, Optional
+import random
 
 
 class Balle:
@@ -109,88 +110,89 @@ class Balle:
 
     def affichage(self, canvas) -> None:
         """Dessine ou met à jour la représentation de la balle sur un tk.Canvas.
-        
-        """ 
-        x0 = self.posX - self.rayon
+        """
+        x0 = self.posX - self.rayon 
         y0 = self.posY - self.rayon
         x1 = self.posX + self.rayon
         y1 = self.posY + self.rayon
 
-        if self._canvas_id is None:
-            try:
+        if self._canvas_id is None: # si la balle n'est pas dessinée 
+            try: # essayer de la dessiner
                 self._canvas_id = canvas.create_oval(x0, y0, x1, y1, fill=self.couleur, outline=self.couleur)
-            except Exception:
+            except Exception: # en cas d'erreur ( par exemple le canvas n'existe pas ) 
                 self._canvas_id = None
         else:
-            try:
-                canvas.coords(self._canvas_id, x0, y0, x1, y1)
+            try: # mettre à jour la position de la balle existante
+                canvas.coords(self._canvas_id, x0, y0, x1, y1) # on met à jour les coordonnées 
             except Exception:
                 self._canvas_id = None
 
+    
     def reset(self, pos: Tuple[float, float], vel: Tuple[float, float] = (0.0, 0.0)) -> None:
-        """Réinitialise la position et la vitesse de la balle."""
+        """Réinitialise la position et la vitesse de la balle.
+        """
         self.posX, self.posY = float(pos[0]), float(pos[1])
         self.vitX, self.vitY = float(vel[0]), float(vel[1])
 
+    
     def collisions_balle(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
         """Teste la collision cercle-brique.
 
         Renvoie True si la balle intersecte le rectangle défini par
         (rx, ry, rwidth, rheight).
         """
-        closest_x = max(rx, min(self.posX, rx + rwidth))
-        closest_y = max(ry, min(self.posY, ry + rheight))
-
-        dx = self.posX - closest_x
-        dy = self.posY - closest_y
+        closest_x = max(rx, min(self.posX, rx + rwidth)) # coordonnée x du point le plus proche
+        closest_y = max(ry, min(self.posY, ry + rheight)) # coordonnée y du point le plus proche 
+       
+        dx = self.posX - closest_x  # distance en x entre le center de la balle et le point le plus proche 
+        dy = self.posY - closest_y  # même chose en y 
         return (dx * dx + dy * dy) <= (self.rayon * self.rayon)
 
+    
     def rebond_brique(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
-        
-        """Si la balle intersecte le rectangle, ajuste la vitesse pour simuler
-        un rebond et retourne True. Utilise une logique simple:
+        """ Si la balle intersecte le rectangle, on ajuste la vitesse pour simuler un rebond.
+    - détecte le côté de contact par la plus petite distance entre le centre de la balle et le bord du rectangle.
+    - inverse la composante de vitesse correspondante après un rebond.
+    Retourne False si pas d'intersection.
+    """
 
-        - détecte le côté de contact par la plus petite distance entre le
-          centre de la balle et le bord du rectangle.
-        - inverse la composante de vitesse correspondante.
-
-        Retourne False si pas d'intersection.
-        """
-        
         if not self.collisions_balle(rx, ry, rwidth, rheight):
             return False
 
         # coordonnées du point le plus proche (déjà calculées dans intersects_rect
         # mais recalculées ici pour simplicité)
-        closest_x = max(rx, min(self.posX, rx + rwidth))
+        closest_x = max(rx, min(self.posX, rx + rwidth)) 
         closest_y = max(ry, min(self.posY, ry + rheight))
-
         dx = self.posX - closest_x
         dy = self.posY - closest_y
 
         # déterminer côté de rebond par la plus petite distance normalisée
         # si |dx| > |dy| alors on rebondit horizontalement (inverser vitX)
-        
         if abs(dx) > abs(dy):
             self.vitX = -self.vitX
+            # Ajouter une variation aléatoire à la vitesse Y
+            self.vitY += random.uniform(-500, 500)
             # pousser la balle hors du rectangle d'une petite marge
             if dx > 0:
-                self.posX = rx + rwidth + self.rayon # à droite
+                self.posX = rx + rwidth + self.rayon  # à droite
             else:
-                self.posX = rx - self.rayon # à gauche
+                self.posX = rx - self.rayon  # à gauche
         else:
-            self.vitY = -self.vitY # rebond vertical
+            self.vitY = -self.vitY  # rebond vertical
+            # Ajouter une variation aléatoire à la vitesse X
+            self.vitX += random.uniform(-500, 500)
             # pousser la balle hors du rectangle d'une petite marge
             if dy > 0:
-                self.posY = ry + rheight + self.rayon # en bas
+                self.posY = ry + rheight + self.rayon  # en bas
             else:
-                self.posY = ry - self.rayon # en haut
-
-        return True # rebond effectué
-
-
-
-"""Casse briques de Sacha BARGOIN & Mouâd OUAMANE 
+                self.posY = ry - self.rayon  # en haut
+        return True  # rebond effectué
+    
+    
+    
+    
+    
+    """Casse briques de Sacha BARGOIN & Mouâd OUAMANE 
 
 A faire fichier dans main2.py : 
   - rajouter un piles & files pour gerer les niveaux et les scores mais aussi un systeme de vie
