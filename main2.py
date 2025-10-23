@@ -42,15 +42,16 @@ color = [
 ]
 
 "ouverture du fichier contenant les scores"
-score = [] 
+scores = [] 
+score = 0
 with open("score", "r") as f:
     for val in f: 
-        score.append(int(val))
+        scores.append(int(val))
 
 "fonction qui enregistre les scores"
 def enregistrer_score(): 
     with open("score", "w") as f:
-        for val in score: 
+        for val in scores: 
             f.write(str(val) + "\n")
 
 """fonction jeu : gère tout le déroulement de la partie une fois le jeu lancé , 
@@ -63,6 +64,7 @@ def jeu():
     caneva.config(bg="#2E003E")
   
     briques = []
+    
 
     # Paramètres d'affichage
     nb_lignes = dif
@@ -131,6 +133,7 @@ def jeu():
 
     # Boucle de jeu : update physics, collisions et redraw
     def game_loop():
+        global score
         nonlocal ball_attached
         dt = 1 / 60.0  # approximativement 60 FPS
 
@@ -149,17 +152,38 @@ def jeu():
                 if balle.rebond_brique(b.x, b.y, b.largeur, b.hauteur):
                     if b.id is not None:
                         caneva.delete(b.id)
-                    try:
                         briques.remove(b)
-                    except ValueError:
-                        pass
+                        score += 10
+                        balle.vitX += 40
+                        balle.vitY += 40
 
     
         balle.affichage(caneva)
+        # afficher gagner si il n'y a plus de brique 
+        if len(briques) == 0: 
+                    # Fond semi-transparent
+            caneva.create_rectangle(0, 0, largeur, hauteur, fill="#000000", stipple="gray50")
 
+            # Message principal
+            caneva.create_text(largeur // 2, hauteur // 2 - 30,
+                       text="GAGNER",
+                       fill="#FFCA0C",
+                       font=("Helvetica", 64, "bold"))
+            
+            caneva.create_text(largeur // 2, hauteur // 2 - 60,
+                       text="Score : " + str(score) ,
+                       fill="#FAF1CE",
+                       font=("Helvetica", 64, "bold"))
+            # Bouton pour relancer 
+            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu())
+            caneva.create_window(largeur // 2, hauteur // 2 + 100, window=retry_button)    
+            enregistrer_score()
         # continuer ou afficher game over si vies épuisées
         if balle.vie > 0:
             Fenetre.after(int(dt * 1000), game_loop)
+
+        
+
         else:           
             # Fond semi-transparent
             caneva.create_rectangle(0, 0, largeur, hauteur, fill="#000000", stipple="gray50")
@@ -172,14 +196,14 @@ def jeu():
 
             # Message secondaire humoristique
             caneva.create_text(largeur // 2, hauteur // 2 + 40,
-                       text="Tu pues le chameau mort 🐫💀",
+                       text="Tu pues le chameau mort 🐫💀 ton score est de " + str(score),
                        fill="white",
                        font=("Helvetica", 28, "italic"))
 
-            # Bouton pour relancer (optionnel)
+            # Bouton pour relancer s
             retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu())
             caneva.create_window(largeur // 2, hauteur // 2 + 100, window=retry_button)
-
+            enregistrer_score()
 
     # start updates
     pad.update()
@@ -219,7 +243,25 @@ curseur = tk.Scale(
     length=300,          # longueur du slider 
     )
 
+score_frame = tk.Frame(caneva, bg="#C1B7B7", width=150, height=300)
+score_frame.pack_propagate(False)
+title_label = tk.Label(score_frame, text="High Scores", fg="#000000",bg="#C1B7B7", font=("Lucida Console", 10))
+title_label.pack(pady=(10, 2))
+
+scores.sort()
+
+X = 0 
+if len(scores) < 7:
+    X = range(len(scores))
+else :
+    X = range(7)
+
+for i in X: 
+    lbl = tk.Label(score_frame, text=str(scores[-(i+1)]), fg="#000000",bg="#C1B7B7", font=("Lucida Console", 20))
+    lbl.pack(anchor="w", pady=2)
+
 # Placer les widgets sur le canevas
+caneva.create_window(900, 500, window=score_frame)  # x=800, y=200
 caneva.create_window(500, 250, window=subtitle)
 caneva.create_window(500, 600, window=texte)
 caneva.create_window(500, 350, window=play_button)
