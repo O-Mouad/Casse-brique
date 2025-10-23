@@ -12,7 +12,7 @@ from classes.briques import Brique
 from classes.balle import Balle
 from classes.pad import Pad
 
-
+# Liste des couleurs des briques
 color = [
     "#F80008",  # rouge vif
     "#FF924C",  # orange clair
@@ -35,6 +35,18 @@ color = [
     "#F15BB5",  # rose magenta
     "#F4E374"   # jaune fluo
 ]
+
+"ouverture du fichier contenant les scores"
+score = [] 
+with open("score", "r") as f:
+    for val in f: 
+        score.append(int(val))
+
+"fonction qui enregistre les scores"
+def enregistrer_score(): 
+    with open("score", "w") as f:
+        for val in score: 
+            f.write(str(val) + "\n")
 
 """fonction jeu : gère tout le déroulement de la partie une fois le jeu lancé , 
 """
