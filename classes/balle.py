@@ -4,6 +4,13 @@ Sacha Bargoin
 TP4 09/10/2025 , 16/10/2025 , 23/10/2025
 fichier de la classe balle 
 
+A faire : - le systeme de vie de la balle 
+- voir pourquoi la balle n'est pas vraiment ronde 
+- vitesse de la balle qui augmente ave les niveaux 
+- faire partir la balle de manière aléatoire au moment où on prese une fleche 
+- lui donner un peu plus de trajetoire aléatoire 
+
+
 Amélioration : ajouter des méthodes pour la balle
 """
 from typing import Tuple, Optional
@@ -23,40 +30,38 @@ class Balle:
     ensuite on a tout les setter pour pouvoir modifier les attributs tout au long du jeu 
 
     Fonctions : - position 
-    - de la velocity de la balle 
-    - update cad met a jour la position de la balle 
+    - de la vitesse de la balle
+    - met à jour la position de la balle 
     - draw qui afffiche la balle 
     - reset qui remet la balle à la pos et à la vitesse initiale 
     - intersects_rect qui teste la collision entre la balle et un rectangle (paddle ou brique)
     """
 
     def __init__(self,
-                 pos: Tuple[float, float] = (0.0, 0.0),
-                 vit: Tuple[float, float] = (0.0, 0.0),
-                 acc: Tuple[float, float] = (0.0, 0.0),
-                 rayon: int = 8,
-                 vie: int = 1,
-                 couleur: str = "white") -> None:
-        self.vie: int = vie
+                 pos: Tuple[float, float] = (0.0, 0.0), # position initiale de la balle
+                 vit: Tuple[float, float] = (0.0, 0.0), # vitesse initiale de la balle
+                 acc: Tuple[float, float] = (0.0, 0.0), # acceleration de la balle
+                 rayon: int = 8, # rayon de la balle 
+                 vie: int = 1, # vie de la balle
+                 couleur: str = "white") -> None: # couleur de la balle
+        self.vie: int = vie 
         self.posX: float = float(pos[0])
         self.posY: float = float(pos[1])
         self.vitX: float = float(vit[0])
         self.vitY: float = float(vit[1])
         self.aX: float = float(acc[0])
         self.aY: float = float(acc[1])
-
         self.rayon: int = rayon
         self.couleur: str = couleur
-        # id de l'oval sur le Canvas (si utilisé)
-        self._canvas_id: Optional[int] = None
+        self._canvas_id: Optional[int] = None # correspond à l'ID d'un objet graphique ( balle ou bloc par exemple ) sur un canevas graphique. Initialiser a "None" car la balle n'est pas encore dessinée
 
     def pos(self, x: float, y: float) -> None:
-        """Place la balle à la position (x, y).
+        """Positionne la balle à la position (x, y).
         """
         self.posX = float(x)
         self.posY = float(y)
 
-    def set_velocity(self, vx: float, vy: float) -> None:
+    def set_vitesse(self, vx: float, vy: float) -> None:
         """Définit la vitesse de la balle."""
         self.vitX = float(vx)
         self.vitY = float(vy)
@@ -69,20 +74,20 @@ class Balle:
         - dt : pas de temps en secondes
         - bounds : (largeur, hauteur) du canevas
         """
-        # protéger dt raisonnable
+        # si la diff de temps est nulle ou négative, ne rien faire
         if dt <= 0:
             return
 
-        # appliquer accélération (système de coordonnées : origine en haut-gauche,
+        # appliquer accélération (on prend l'origine en haut à gauche,
         # y positif vers le bas — donc aY positive fera accélérer vers le bas)
         self.vitX += self.aX * dt
         self.vitY += self.aY * dt
 
-        # mise à jour position
+        # mise à jour position en fonction de la vitesse et du temps 
         self.posX += self.vitX * dt
         self.posY += self.vitY * dt
 
-        largeur, hauteur = bounds
+        largeur, hauteur = bounds 
 
         # collisions gauche/droite (rebond simple)
         if self.posX - self.rayon < 0:
@@ -102,7 +107,7 @@ class Balle:
         if self.posY - self.rayon > hauteur:
             self.vie -= 1
 
-    def draw(self, canvas) -> None:
+    def affichage(self, canvas) -> None:
         """Dessine ou met à jour la représentation de la balle sur un tk.Canvas.
         
         """ 
@@ -127,8 +132,8 @@ class Balle:
         self.posX, self.posY = float(pos[0]), float(pos[1])
         self.vitX, self.vitY = float(vel[0]), float(vel[1])
 
-    def intersects_rect(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
-        """Teste la collision cercle-brique (approximation AABB).
+    def collisions_balle(self, rx: float, ry: float, rwidth: float, rheight: float) -> bool:
+        """Teste la collision cercle-brique.
 
         Renvoie True si la balle intersecte le rectangle défini par
         (rx, ry, rwidth, rheight).
@@ -152,7 +157,7 @@ class Balle:
         Retourne False si pas d'intersection.
         """
         
-        if not self.intersects_rect(rx, ry, rwidth, rheight):
+        if not self.collisions_balle(rx, ry, rwidth, rheight):
             return False
 
         # coordonnées du point le plus proche (déjà calculées dans intersects_rect
@@ -182,3 +187,20 @@ class Balle:
                 self.posY = ry - self.rayon # en haut
 
         return True # rebond effectué
+
+
+
+"""Casse briques de Sacha BARGOIN & Mouâd OUAMANE 
+
+A faire fichier dans main2.py : 
+  - rajouter un piles & files pour gerer les niveaux et les scores mais aussi un systeme de vie
+  - ameliorer le design
+  - ameliorer la gestion des collisions
+  - faire en sorte que le caneva s'adapte a la taille de l'ecran
+
+A faire dans balle.py :
+  - le systeme de vie de la balle 
+  - vitesse de la balle qui augmente ave les niveaux 
+  - faire partir la balle de manière aléatoire au moment où on prese une fleche 
+  - lui donner un peu plus de trajetoire aléatoire 
+"""
