@@ -1,7 +1,25 @@
 import tkinter as tk
 
+ """Classe représentant la raquette du casse-briques.
+
+    Attributs: 
+    - les coordonnées du pad 
+    - la vitesse de déplacement du pad 
+    - ses dimensions 
+    - sa couleur
+
+    on declare les variable sans _self. pour pouvoir y acceder plus simplement par la suite
+    
+    Fonctions : 
+    - afficher 
+    - 4 fonctions pour le déplacement avec 4 flags 
+    - une fonction get_coords qui permet de recuperer x et y d'un seul coup 
+    - une fonction update
+    """
+
+
 class Pad:
-    def __init__(self, canvas, x, y, vitesse = 15, largeur=120, hauteur=20, couleur="blue"):
+    def __init__(self, canvas, x, y, vitesse = 10, largeur=120, hauteur=20, couleur="blue"):
         self.canvas = canvas
         self.x = x 
         self.y = y
@@ -12,6 +30,7 @@ class Pad:
         self.id = None
         self.moving_left = False
         self.moving_right = False
+
     def afficher(self): 
         self.id = self.canvas.create_rectangle(
             self.x, self.y, self.x + self.largeur, self.y + self.hauteur, fill=self.couleur

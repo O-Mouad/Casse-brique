@@ -12,7 +12,7 @@ from classes.balle import Balle
 from classes.pad import Pad
 
 color = [
-    "#FF595E",  # rouge vif
+    "#F80008",  # rouge vif
     "#FF924C",  # orange clair
     "#FFCA3A",  # jaune
     "#8AC926",  # vert clair
@@ -22,16 +22,16 @@ color = [
     "#0FA3B1",  # turquoise
     "#A29BFE",  # lavande
     "#FFD6E0",  # rose pâle
-    "#F9844A",  # orange doux
+    "#FF5100",  # orange doux
     "#43AA8B",  # vert menthe
     "#577590",  # bleu gris
     "#FF70A6",  # rose vif
     "#FF9770",  # pêche
     "#70D6FF",  # bleu ciel
-    "#B5E48C",  # vert lime clair
+    "#A1F954",  # vert lime clair
     "#9B5DE5",  # violet flashy
     "#F15BB5",  # rose magenta
-    "#FEE440"   # jaune fluo
+    "#F4E374"   # jaune fluo
 ]
 
 def jeu(dif):
@@ -45,7 +45,7 @@ def jeu(dif):
     nb_lignes = dif
     nb_par_ligne = 9
     marge = 10  # espace entre les briques
-    offset_y = 5  # distance du haut de l'écran
+    offset_y = 10  # distance du haut de l'écran
 
     for ligne in range(nb_lignes):
         for col in range(nb_par_ligne): # 9 briques par ligne
@@ -161,10 +161,6 @@ def jeu(dif):
     # start updates
     pad.update()
     game_loop()
-    # debug print
-    print("balle pos:", balle.posX, balle.posY)
-    print("items sur canvas:", len(caneva.find_all()))
-    
 
 (largeur,hauteur) =(1000,700)
 
