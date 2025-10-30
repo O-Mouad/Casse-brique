@@ -1,6 +1,8 @@
-""" Mouad Ouamane
+""" 
+Mouad Ouamane
 Sacha Bargoin 
-TP4 09/10/2025 , 16/10/2025 , 23/10/2025
+Groupe C
+TP4 Casse briques 09/10/2025 , 16/10/2025 , 23/10/2025 
 
 Fichier contenant les structures de données ( normalement il devrait y avoir un fichier par class mais le proffesseur nous a dis que ce n'était pas grave)
 

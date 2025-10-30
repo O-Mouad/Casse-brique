@@ -1,3 +1,22 @@
+""" 
+Mouad Ouamane
+Sacha Bargoin 
+Groupe C
+TP4 Casse briques 09/10/2025 , 16/10/2025 , 23/10/2025 
+
+fichier de la classe pad qui gère la raquette du jeu
+
+Amélioration possible : - ajouter un meilleur design au pad ( ou la couleur qui changent en fonction du niveau )
+                        - ajouter des effets sonores lorsque le pad bouge et/ou frappe la balle ( même si un peu  lassant peut-être)
+                        - ajouter des malus et bonus qui touchent le pad ( et non pas faisable seulement dans le menu)
+                        ex : des roquettes qui partent du pad et qui permettent de casser les briques, 
+                             un malus de ralentissement du pad, de réduction de sa taille, etc.
+                             un bonus d'accélration, d'agrandissement de la taille, etc.
+                        - et plein d'autres idées pour lesquelles on manque de temps ....    
+                             
+"""
+
+
 import tkinter as tk
 
 """Classe représentant la raquette du casse-briques.

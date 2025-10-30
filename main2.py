@@ -1,8 +1,19 @@
 """
 Mouad Ouamane
 Sacha Bargoin 
-TP4 09/10/2025
-fichier main
+Groupe C
+TP4 Casse briques 09/10/2025 , 16/10/2025 , 23/10/2025 
+
+fichier main qui gère le deroulement du jeu et toutes les interactions entre les différentes classes
+
+Amélioration possible : - ajouter des niveaux bonus
+                        - mettre les messages de victoire et de défaites de manieres interactive ( en mouvement par exemple )
+                        - faire en sorte que le caneva soit redimensionnable et qu'il prenne tout l'écran ( super compliqué )
+                        - ajouter une bande son ou des effets sonores pour le menu et le jeu 
+                        - réorganiser le code en plusieurs fichiers pour une meilleure lisibilité 
+                        - configurer le jeu pour pouvoir jouer avec différents périphériques 
+                        - rajouter des bonus ( voir class pad.py pour les idées de bonus et malus ) 
+                        
 """
 
 # Imports standard

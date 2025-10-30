@@ -2,9 +2,16 @@
 Mouad Ouamane
 Sacha Bargoin 
 TP4 09/10/2025 , 16/10/2025 , 23/10/2025
-fichier de la classe balle 
 
-Amélioration : ajouter des méthodes pour la balle
+fichier de la classe balle qui gère la balle et toute ses interactions 
+
+Amélioration possible: - ajouter des méthodes pour la balle
+               - ajouter un meilleur design à la balle 
+               - ajouter des effets sonores 
+               - ajouter une meilleure gestion des collisions avec des effets visuels 
+               - faire en sorte que la balle change de couleur en fonction du niveau
+               - faire en sorte que la balle accélère légèrement à chaque rebond pour augmenter la difficulté
+
 """
 from typing import Tuple, Optional
 import random
@@ -203,10 +210,4 @@ A faire fichier dans main2.py :
   - ameliorer le design
   - ameliorer la gestion des collisions
   - faire en sorte que le caneva s'adapte a la taille de l'ecran
-
-A faire dans balle.py :
-  - le systeme de vie de la balle 
-  - vitesse de la balle qui augmente ave les niveaux 
-  - faire partir la balle de manière aléatoire au moment où on prese une fleche 
-  - lui donner un peu plus de trajetoire aléatoire 
-"""
+""" 
