@@ -2,8 +2,17 @@
 """
 Mouad Ouamane
 Sacha Bargoin 
-TP4 09/10/2025
-fichier de la class game
+Groupe C
+TP4 Casse briques 09/10/2025 , 16/10/2025 , 23/10/2025
+
+fichier de la class briques qui gère les briques du jeu 
+
+Amélioration possible : - ajouter des méthodes pour chaque brique ( par exemple pour gérer les briques spéciales )
+                        - ajouter une animùation lors de la destruction des briques
+                        - ajouter des effets sonores lors de la destruction des briques
+                        - ajouter des briques avec plus de vie ( 2 ou 3 coups pour les casser)
+                        - ajouter des briques spéciales ( qui donnent des bonus ou malus )
+                        
 """
 
 import tkinter as tk
