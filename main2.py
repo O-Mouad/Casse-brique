@@ -3,19 +3,30 @@ Mouad Ouamane
 Sacha Bargoin 
 TP4 09/10/2025
 fichier main
-
-A faire : -rajouter un piles & files pour gerer les niveaux et les scores mais aussi un systeme de vie
-- ameliorer le design
-- ameliorer la gestion des collisions
-- faire en sorte que le caneva s'adapte a la taille de l'ecran
 """
+
+# Imports standard
 import os
 import tkinter as tk
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
+
+# Imports locaux
 from classes.briques import Brique
 from classes.balle import Balle
 from classes.pad import Pad
+from classes.structures import File, Pile
+
+# Constantes globales
+LARGEUR, HAUTEUR = 1000, 700
+NIVEAU_MIN, NIVEAU_MAX = 1, 15
+TAILLE_PAD_MIN, TAILLE_PAD_MAX = 60, 180
+TAILLE_PAD_DEFAUT = 120
+MAX_SCORES_AFFICHES = 7
+
+# Structures de données
+niveaux = File()  # File pour gérer la progression des niveaux
+scores_historique = Pile(MAX_SCORES_AFFICHES)  # Pile pour gérer les scores
 
 # Liste des couleurs des briques
 color = [
@@ -41,24 +52,43 @@ color = [
     "#F4E374"   # jaune fluo
 ]
 
-"ouverture du fichier contenant les scores"
-scores = [] 
-score = 0
-try:
-    with open("score.txt", "r") as f:
-        for val in f: 
-            scores.append(int(val))
-except FileNotFoundError:
-    # Si le fichier n'existe pas, on le crée avec un score initial de 0 ( j'ai rajouter cette partie car suivant la version python cela peut poser probleme     )
-    with open("score.txt", "w") as f:
-        f.write("0\n")
-    scores.append(0)
+# Initialisation des scores depuis le fichier
+def charger_scores():
+    """Charge les scores depuis le fichier score.txt dans la pile des scores"""
+    try:
+        with open("score.txt", "r") as f:
+            for ligne in f:
+                score = int(ligne.strip())
+                scores_historique.empiler(score)
+    except FileNotFoundError:
+        # Créer le fichier s'il n'existe pas
+        with open("score.txt", "w") as f:
+            f.write("0\n")
+        scores_historique.empiler(0)
 
-"fonction qui enregistre les scores"
-def enregistrer_score(): 
+def enregistrer_scores():
+    """Enregistre les scores de la pile dans le fichier score.txt"""
     with open("score.txt", "w") as f:
-        for val in scores: 
-            f.write(str(val) + "\n")
+        for score in scores_historique.elements:
+            f.write(f"{score}\n")
+
+def initialiser_niveaux(difficulte):
+    """Initialise la file des niveaux en fonction de la difficulté choisie"""
+    niveaux.elements.clear()
+    niveau_actuel = difficulte
+    # Ajoute 3 niveaux à la file, en augmentant progressivement la difficulté
+    for i in range(3):
+        niveaux.enfiler({
+            'niveau': niveau_actuel + i,
+            'nb_briques': 9 * (niveau_actuel + i),
+            'vitesse_balle': 200 + (niveau_actuel + i) * 20
+        })
+
+# Score global pour la partie en cours
+score = 0
+
+# Chargement initial des scores
+charger_scores()
 
 """fonction jeu : gère tout le déroulement de la partie une fois le jeu lancé , 
 """
@@ -74,8 +104,10 @@ def retour_menu():
     # Réafficher tous les éléments du menu
     caneva.create_text(500, 150, text="CASSE BRIQUES DU FUTURE", fill="white", font=("Lucida Console", 24))
     caneva.create_window(500, 250, window=subtitle)
+    caneva.create_window(500, 550, window=texte_pad)
     caneva.create_window(500, 600, window=texte)
     caneva.create_window(500, 350, window=play_button)
+    caneva.create_window(500, 580, window=curseur_pad)
     caneva.create_window(500, 650, window=curseur)
     caneva.create_window(900, 500, window=score_frame)
 
@@ -130,7 +162,9 @@ def jeu():
             brique.afficher(caneva)
             briques.append(brique)
 
-    pad = Pad(caneva, 440, 650)  # position au bas de l’écran
+    # Création du pad avec la taille choisie dans le menu
+    taille_pad = curseur_pad.get()
+    pad = Pad(caneva, 440, 650, largeur=taille_pad)  # position au bas de l'écran
     pad.afficher()
 
     # Création de la balle avec rayon connu
@@ -284,7 +318,8 @@ def jeu():
             caneva.create_window(largeur // 2 - 80, hauteur // 2 + 100, window=retry_button)
             caneva.create_window(largeur // 2 + 80, hauteur // 2 + 100, window=menu_button)
             
-            enregistrer_score()
+            scores_historique.empiler(score)
+            enregistrer_scores()
             return  # Arrêter la boucle de jeu
         # continuer ou afficher game over si vies épuisées
         if balle.vie > 0:
@@ -314,10 +349,12 @@ def jeu():
                        fill="white",
                        font=("Helvetica", 28, "italic"))
 
-            # Bouton pour relancer s
-            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu())
+            # Bouton pour relancer
+            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), 
+                                   bg="#333", fg="white", command=lambda: jeu())
             caneva.create_window(largeur // 2, hauteur // 2 + 100, window=retry_button)
-            enregistrer_score()
+            scores_historique.empiler(score)
+            enregistrer_scores()
 
     # start updates
     pad.update()
@@ -348,37 +385,45 @@ caneva.pack(fill="both", expand=True)
 caneva.create_text(500, 150, text="CASSE BRIQUES DU FUTURE", fill="white",font =("Lucida Console", 24))
 subtitle = tk.Label(Fenetre, text="Appuie sur 'Jouer' pour commencer",)
 texte = tk.Label(Fenetre, text="difficulté du jeu:")
+texte_pad = tk.Label(Fenetre, text="taille du pad:")
 play_button = tk.Button(Fenetre, text="Jouer", command=lambda: jeu())
+
+curseur_pad = tk.Scale(
+    caneva,             # parent
+    from_=60, to=180,   # bornes (taille min et max du pad)
+    orient='horizontal', # orientation
+    length=300,         # longueur du slider
+    )
+curseur_pad.set(120)    # taille par défaut du pad
 
 curseur = tk.Scale(
     caneva,             # parent
-    from_=1, to=15,      # bornes
+    from_=1, to=15,     # bornes
     orient='horizontal', # orientation
-    length=300,          # longueur du slider 
+    length=300,         # longueur du slider 
     )
 
-score_frame = tk.Frame(caneva, bg="#C1B7B7", width=150, height=300) # cadre pour les scores
-score_frame.pack_propagate(False) # empêche le redimensionnement automatique car trop compliqué pour nous 
-title_label = tk.Label(score_frame, text="High Scores", fg="#000000",bg="#C1B7B7", font=("Lucida Console", 10)) # titre des scores
+# Création du cadre des high scores
+score_frame = tk.Frame(caneva, bg="#C1B7B7", width=150, height=300)
+score_frame.pack_propagate(False)
+title_label = tk.Label(score_frame, text="High Scores", fg="#000000", bg="#C1B7B7", 
+                      font=("Lucida Console", 10))
 title_label.pack(pady=(10, 2))
 
-scores.sort()
-
-X = 0 
-if len(scores) < 7:
-    X = range(len(scores))
-else :
-    X = range(7)
-
-for i in X: 
-    lbl = tk.Label(score_frame, text=str(scores[-(i+1)]), fg="#000000",bg="#C1B7B7", font=("Lucida Console", 20))
+# Affichage des meilleurs scores
+scores_tries = scores_historique.get_scores_tries()
+for score in scores_tries[:MAX_SCORES_AFFICHES]:
+    lbl = tk.Label(score_frame, text=str(score), fg="#000000", bg="#C1B7B7", 
+                  font=("Lucida Console", 20))
     lbl.pack(anchor="w", pady=2)
 
 # Placer les widgets sur le canevas
 caneva.create_window(900, 500, window=score_frame)  # x=800, y=200 ce sont les coordonées du centre du cadre
 caneva.create_window(500, 250, window=subtitle) 
-caneva.create_window(500, 600, window=texte)
+caneva.create_window(500, 550, window=texte_pad)   # Label pour la taille du pad
+caneva.create_window(500, 600, window=texte)       # Label pour la difficulté
 caneva.create_window(500, 350, window=play_button)
-caneva.create_window(500, 650, window=curseur)
+caneva.create_window(500, 580, window=curseur_pad) # Curseur pour la taille du pad
+caneva.create_window(500, 650, window=curseur)     # Curseur pour la difficulté
 
 Fenetre.mainloop()

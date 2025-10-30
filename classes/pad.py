@@ -70,3 +70,31 @@ class Pad:
             self.canvas.move(self.id, self.vitesse, 0)
             self.x += self.vitesse
         self.canvas.after(15, self.update) 
+
+    def set_taille(self, nouvelle_largeur):
+        """Change la taille du pad et met à jour son affichage
+        
+        variable:
+            nouvelle_largeur (int): La nouvelle largeur du pad en pixels
+        """
+        # Sauvegarde la position actuelle du centre du pad
+        centre_x = self.x + self.largeur / 2
+        
+        # Met à jour la largeur
+        self.largeur = nouvelle_largeur
+        
+        # Recalcule la position x pour garder le pad centré
+        self.x = centre_x - self.largeur / 2
+        
+        # Si le pad sort de l'écran, le ramener dans les limites
+        if self.x < 0:
+            self.x = 0
+        elif self.x + self.largeur > 1000:
+            self.x = 1000 - self.largeur
+            
+        # Supprime l'ancien pad
+        if self.id is not None:
+            self.canvas.delete(self.id)
+            
+        # Réaffiche le pad avec sa nouvelle taille
+        self.afficher()
