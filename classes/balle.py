@@ -4,13 +4,6 @@ Sacha Bargoin
 TP4 09/10/2025 , 16/10/2025 , 23/10/2025
 fichier de la classe balle 
 
-A faire : - le systeme de vie de la balle 
-- voir pourquoi la balle n'est pas vraiment ronde 
-- vitesse de la balle qui augmente ave les niveaux 
-- faire partir la balle de manière aléatoire au moment où on prese une fleche 
-- lui donner un peu plus de trajetoire aléatoire 
-
-
 Amélioration : ajouter des méthodes pour la balle
 """
 from typing import Tuple, Optional

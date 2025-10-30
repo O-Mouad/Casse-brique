@@ -1,9 +1,21 @@
+""" Mouad Ouamane
+Sacha Bargoin 
+TP4 09/10/2025 , 16/10/2025 , 23/10/2025
+
+Fichier contenant les structures de données ( normalement il devrait y avoir un fichier par class mais le proffesseur nous a dis que ce n'était pas grave)
+
+Amerlioration possible : - ajouter des méthodes pour chaque structure de données
+                         - mettre chaque class dans un fichier différent 
+                         
+"""
+
+
 class File:
     """
     Implémentation d'une structure de file (FIFO - First In First Out)
     pour gérer la séquence des niveaux
     """
-    def __init__(self):
+    def __init__(self): 
         self.elements = []
     
     def enfiler(self, element):
@@ -32,8 +44,8 @@ class File:
 
 class Pile:
     """
-    Implémentation d'une structure de pile (LIFO - Last In First Out)
-    pour gérer l'historique des scores
+    Implémentation d'une structure de pile
+    pour gérer l'historique des scores (pas trop important pour le resulatats du jeu présent mais utile en cas d'amélioration )
     """
     def __init__(self, taille_max=7):
         self.elements = []
