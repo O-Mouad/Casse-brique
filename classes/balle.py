@@ -43,8 +43,9 @@ class Balle:
                  vit: Tuple[float, float] = (0.0, 0.0), # vitesse initiale de la balle
                  acc: Tuple[float, float] = (0.0, 0.0), # acceleration de la balle
                  rayon: int = 8, # rayon de la balle 
-                 vie: int = 1, # vie de la balle
+                 vie: int = 3, # vie de la balle (augmenté à 3)
                  couleur: str = "white") -> None: # couleur de la balle
+        self.niveau = 1  # niveau par défaut 
         self.vie: int = vie 
         self.posX: float = float(pos[0])
         self.posY: float = float(pos[1])
@@ -62,10 +63,18 @@ class Balle:
         self.posX = float(x)
         self.posY = float(y)
 
+    def set_niveau(self, niveau: int) -> None:
+        """Définit le niveau de difficulté qui affecte la vitesse de la balle."""
+        self.niveau = niveau
+
     def set_vitesse(self, vx: float, vy: float) -> None:
-        """Définit la vitesse de la balle."""
-        self.vitX = float(vx)
-        self.vitY = float(vy)
+        """Définit la vitesse de la balle avec une composante aléatoire et ajustée selon le niveau."""
+        # Facteur de vitesse basé sur le niveau (augmentation de 15% par niveau)
+        facteur_vitesse = 1.0 + (self.niveau - 1) * 0.15
+        
+        # Application du facteur de vitesse et ajout de l'aléatoire
+        self.vitX = (float(vx) + random.uniform(-20, 20)) * facteur_vitesse
+        self.vitY = (float(vy) + random.uniform(-20, 20)) * facteur_vitesse
 
     def update(self, dt: float, bounds: Tuple[int, int]) -> None:
         
@@ -107,6 +116,11 @@ class Balle:
         # si la balle dépasse le bas du canevas -> perte de vie
         if self.posY - self.rayon > hauteur:
             self.vie -= 1
+            # Réinitialiser la vitesse à 0 pour que la balle reste attachée au pad
+            self.vitX = 0
+            self.vitY = 0
+            return True  # Indique qu'une vie a été perdue
+        return False    # Pas de perte de vie
 
     def affichage(self, canvas) -> None:
         """Dessine ou met à jour la représentation de la balle sur un tk.Canvas.
@@ -171,7 +185,7 @@ class Balle:
         if abs(dx) > abs(dy):
             self.vitX = -self.vitX
             # Ajouter une variation aléatoire à la vitesse Y
-            self.vitY += random.uniform(-500, 500)
+            self.vitY += random.uniform(-200, 200)  # Réduit la variation pour plus de contrôle
             # pousser la balle hors du rectangle d'une petite marge
             if dx > 0:
                 self.posX = rx + rwidth + self.rayon  # à droite
@@ -188,10 +202,7 @@ class Balle:
                 self.posY = ry - self.rayon  # en haut
         return True  # rebond effectué
     
-    
-    
-    
-    
+
     """Casse briques de Sacha BARGOIN & Mouâd OUAMANE 
 
 A faire fichier dans main2.py : 

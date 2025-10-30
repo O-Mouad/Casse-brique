@@ -44,33 +44,83 @@ color = [
 "ouverture du fichier contenant les scores"
 scores = [] 
 score = 0
-with open("score", "r") as f:
-    for val in f: 
-        scores.append(int(val))
+try:
+    with open("score.txt", "r") as f:
+        for val in f: 
+            scores.append(int(val))
+except FileNotFoundError:
+    # Si le fichier n'existe pas, on le crée avec un score initial de 0 ( j'ai rajouter cette partie car suivant la version python cela peut poser probleme     )
+    with open("score.txt", "w") as f:
+        f.write("0\n")
+    scores.append(0)
 
 "fonction qui enregistre les scores"
 def enregistrer_score(): 
-    with open("score", "w") as f:
+    with open("score.txt", "w") as f:
         for val in scores: 
             f.write(str(val) + "\n")
 
 """fonction jeu : gère tout le déroulement de la partie une fois le jeu lancé , 
 """
 
+def retour_menu():
+    # Effacer le canvas et réafficher le menu principal
+    caneva.delete("all")
+    caneva.config(bg="#2E003E")
+    
+    # Réafficher l'image de fond
+    caneva.create_image(0, 0, anchor="nw", image=image_tk)
+    
+    # Réafficher tous les éléments du menu
+    caneva.create_text(500, 150, text="CASSE BRIQUES DU FUTURE", fill="white", font=("Lucida Console", 24))
+    caneva.create_window(500, 250, window=subtitle)
+    caneva.create_window(500, 600, window=texte)
+    caneva.create_window(500, 350, window=play_button)
+    caneva.create_window(500, 650, window=curseur)
+    caneva.create_window(900, 500, window=score_frame)
+
 def jeu():
     dif = curseur.get()
 
     caneva.delete("all")
-    caneva.config(bg="#2E003E")
+    
+    # Charger l'image de fond pour le jeu
+    game_bg_path = os.path.join(os.path.dirname(__file__), "asset", "vis", "galaxie.jpg")
+    game_bg_path = os.path.normpath(game_bg_path)
+    
+    # Charger et redimensionner l'image de fond du jeu
+    game_bg = Image.open(game_bg_path)
+    game_bg_resized = game_bg.resize((largeur, hauteur), Image.Resampling.LANCZOS)
+    game_bg_tk = ImageTk.PhotoImage(game_bg_resized)
+    
+    # Créer l'image de fond
+    caneva.create_image(0, 0, anchor="nw", image=game_bg_tk)
+    # Garder une référence pour éviter la collecte de déchets
+    caneva.game_bg = game_bg_tk
   
     briques = []
+    
+    # Ajouter les boutons Menu et Quitter
+    menu_button = tk.Button(Fenetre, text="Menu", command=retour_menu, bg="#333", fg="white", font=("Helvetica", 12))
+    quit_button = tk.Button(Fenetre, text="Quitter", command=Fenetre.quit, bg="#333", fg="white", font=("Helvetica", 12))
+    
+    # Créer une bande noire semi-transparente en haut pour l'en-tête
+    caneva.create_rectangle(0, 0, largeur, 50, fill="#000000", stipple="gray50")
+    
+    # Placer les boutons en haut à droite
+    caneva.create_window(largeur - 100, 25, window=menu_button)
+    caneva.create_window(largeur - 30, 25, window=quit_button)
     
 
     # Paramètres d'affichage
     nb_lignes = dif
     nb_par_ligne = 9
     marge = 10  # espace entre les briques
-    offset_y = 10  # distance du haut de l'écran
+    offset_y = 60  # augmenté pour laisser de la place pour l'en-tête
+    
+    # Créer l'en-tête
+    caneva.create_rectangle(0, 0, largeur, 50, fill="#000000", stipple="gray50")
+    caneva.create_line(0, 50, largeur, 50, fill="white", width=2)  # ligne de séparation
 
     for ligne in range(nb_lignes):
         for col in range(nb_par_ligne): # 9 briques par ligne
@@ -84,7 +134,18 @@ def jeu():
     pad.afficher()
 
     # Création de la balle avec rayon connu
-    balle = Balle(rayon=10, couleur="white")  # rayon visible
+    # Moins de vies pour les niveaux faciles
+    if dif <= 5:
+        vies_initiales = 2  # 2 vies pour les niveaux 1-5
+    elif dif <= 10:
+        vies_initiales = 3  # 3 vies pour les niveaux 6-10
+    else:
+        vies_initiales = 4  # 4 vies pour les niveaux 11-15
+    
+    balle = Balle(rayon=10, couleur="white", vie=vies_initiales)
+    
+    # Définir le niveau de difficulté pour la balle
+    balle.set_niveau(dif)  # dif vient du curseur
 
     # Position : centrée sur le pad, au-dessus (centre X du pad)
     balle_x = pad.x + pad.largeur / 2
@@ -132,52 +193,99 @@ def jeu():
     Fenetre.bind("<KeyRelease-Right>", relacher_droite)
 
     # Boucle de jeu : update physics, collisions et redraw
+    def afficher_vies():
+        """ Fonction qui affiche les vies restantes sous forme de cœurs """
+        # Effacer les anciens cœurs et le texte
+        caneva.delete("coeurs")
+        # Afficher "Niveau X" au centre
+        caneva.create_text(largeur // 2, 25, text=f"Niveau {dif}", fill="white", 
+                          font=("Arial", 16, "bold"), tags="coeurs")
+        # Afficher le texte "Vies : " suivi des cœurs à gauche
+        caneva.create_text(20, 25, text="Vies :", fill="white", 
+                          font=("Arial", 14), anchor="w", tags="coeurs")
+        # Afficher les nouveaux cœurs
+        for i in range(balle.vie):
+            caneva.create_text(80 + i*25, 25, text="♥", fill="red", 
+                             font=("Arial", 20), tags="coeurs")
+
     def game_loop():
         global score
         nonlocal ball_attached
         dt = 1 / 60.0  # approximativement 60 FPS
+        
+        # Mettre à jour l'affichage des vies
+        afficher_vies()
 
         if ball_attached:
             # garde la balle au centre du pad
             balle.pos(pad.x + pad.largeur / 2, pad.y - balle.rayon - 1)
         else:
             # mise à jour de la physique qui sont dans balle.py
-            balle.update(dt, (largeur, hauteur))
+            vie_perdue = balle.update(dt, (largeur, hauteur))
+            if vie_perdue:
+                # Une vie a été perdue
+                if balle.vie > 0:
+                    # S'il reste des vies, réattacher la balle au pad
+                    ball_attached = True
+                    balle.pos(pad.x + pad.largeur / 2, pad.y - balle.rayon - 1)
+                    # Mettre à jour l'affichage des vies
+                    afficher_vies()
+                else:
+                    # Fin de partie
+                    caneva.create_text(largeur // 2, hauteur // 2 + 40,
+                       text="Tu pues le chameau mort �💀 ton score est de " + str(score),
+                       fill="white",
+                       font=("Helvetica", 28, "italic"))
+                    # Créer un bouton pour rejouer
+                    replay_button = tk.Button(Fenetre, text="Rejouer", command=lambda: [caneva.delete("all"), jeu()], 
+                                           bg="#333", fg="white", font=("Helvetica", 16))
+                    caneva.create_window(largeur/2, hauteur/2 + 100, window=replay_button)
+                    return  # Arrêter la boucle de jeu
+            else:
+                # collision entre le pad et la balle 
+                balle.rebond_brique(pad.x, pad.y, pad.largeur, pad.hauteur)
 
-            # collision entre le pad et la balle 
-            balle.rebond_brique(pad.x, pad.y, pad.largeur, pad.hauteur)
-
-            # collision briques : si rebond contre une brique -> suppression
-            for b in briques[:]:
-                if balle.rebond_brique(b.x, b.y, b.largeur, b.hauteur):
-                    if b.id is not None:
-                        caneva.delete(b.id)
-                        briques.remove(b)
-                        score += 10
-                        balle.vitX += 40
-                        balle.vitY += 40
+                # collision briques : si rebond contre une brique -> suppression
+                for b in briques[:]:
+                    if balle.rebond_brique(b.x, b.y, b.largeur, b.hauteur):
+                        if b.id is not None:
+                            caneva.delete(b.id)
+                            briques.remove(b)
+                            score += 10
+                            balle.vitX += 40
+                            balle.vitY += 40
 
     
         balle.affichage(caneva)
         # afficher gagner si il n'y a plus de brique 
         if len(briques) == 0: 
-                    # Fond semi-transparent
+            # Fond semi-transparent
             caneva.create_rectangle(0, 0, largeur, hauteur, fill="#000000", stipple="gray50")
 
-            # Message principal
-            caneva.create_text(largeur // 2, hauteur // 2 - 30,
-                       text="GAGNER",
+            # Message GAGNER en haut
+            caneva.create_text(largeur // 2, hauteur // 2 - 100,
+                       text="GAGNER !",
                        fill="#FFCA0C",
                        font=("Helvetica", 64, "bold"))
             
-            caneva.create_text(largeur // 2, hauteur // 2 - 60,
-                       text="Score : " + str(score) ,
+            # Score en dessous
+            caneva.create_text(largeur // 2, hauteur // 2,
+                       text="Score : " + str(score),
                        fill="#FAF1CE",
-                       font=("Helvetica", 64, "bold"))
-            # Bouton pour relancer 
-            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), bg="#333", fg="white", command=lambda: jeu())
-            caneva.create_window(largeur // 2, hauteur // 2 + 100, window=retry_button)    
+                       font=("Helvetica", 48, "bold"))
+            
+            # Boutons
+            retry_button = tk.Button(Fenetre, text="Rejouer", font=("Helvetica", 16, "bold"), 
+                                   bg="#333", fg="white", command=lambda: [caneva.delete("all"), jeu()])
+            menu_button = tk.Button(Fenetre, text="Menu", font=("Helvetica", 16, "bold"), 
+                                  bg="#333", fg="white", command=retour_menu)
+            
+            # Positionner les boutons côte à côte
+            caneva.create_window(largeur // 2 - 80, hauteur // 2 + 100, window=retry_button)
+            caneva.create_window(largeur // 2 + 80, hauteur // 2 + 100, window=menu_button)
+            
             enregistrer_score()
+            return  # Arrêter la boucle de jeu
         # continuer ou afficher game over si vies épuisées
         if balle.vie > 0:
             Fenetre.after(int(dt * 1000), game_loop)
@@ -187,6 +295,12 @@ def jeu():
         else:           
             # Fond semi-transparent
             caneva.create_rectangle(0, 0, largeur, hauteur, fill="#000000", stipple="gray50")
+
+            # Conserver les boutons Menu et Quitter visibles
+            menu_button = tk.Button(Fenetre, text="Menu", command=retour_menu, bg="#333", fg="white", font=("Helvetica", 12))
+            quit_button = tk.Button(Fenetre, text="Quitter", command=Fenetre.quit, bg="#333", fg="white", font=("Helvetica", 12))
+            caneva.create_window(largeur - 100, 30, window=menu_button)
+            caneva.create_window(largeur - 30, 30, window=quit_button)
 
             # Message principal
             caneva.create_text(largeur // 2, hauteur // 2 - 30,
@@ -212,10 +326,10 @@ def jeu():
 (largeur,hauteur) =(1000,700)
 
 Fenetre = tk.Tk()
-Fenetre.title("casses burnes")
+Fenetre.title("Casses briques")
 Fenetre.resizable(False, False)  # Empêche le redimensionnement
 
- # Chemin de l'image
+ # Chemin de l'image du menu
 base_path = os.path.dirname(__file__)
 image_path = os.path.join(base_path, "asset", "vis", "fond.png")
 image_path = os.path.normpath(image_path)
@@ -243,9 +357,9 @@ curseur = tk.Scale(
     length=300,          # longueur du slider 
     )
 
-score_frame = tk.Frame(caneva, bg="#C1B7B7", width=150, height=300)
-score_frame.pack_propagate(False)
-title_label = tk.Label(score_frame, text="High Scores", fg="#000000",bg="#C1B7B7", font=("Lucida Console", 10))
+score_frame = tk.Frame(caneva, bg="#C1B7B7", width=150, height=300) # cadre pour les scores
+score_frame.pack_propagate(False) # empêche le redimensionnement automatique car trop compliqué pour nous 
+title_label = tk.Label(score_frame, text="High Scores", fg="#000000",bg="#C1B7B7", font=("Lucida Console", 10)) # titre des scores
 title_label.pack(pady=(10, 2))
 
 scores.sort()
@@ -261,8 +375,8 @@ for i in X:
     lbl.pack(anchor="w", pady=2)
 
 # Placer les widgets sur le canevas
-caneva.create_window(900, 500, window=score_frame)  # x=800, y=200
-caneva.create_window(500, 250, window=subtitle)
+caneva.create_window(900, 500, window=score_frame)  # x=800, y=200 ce sont les coordonées du centre du cadre
+caneva.create_window(500, 250, window=subtitle) 
 caneva.create_window(500, 600, window=texte)
 caneva.create_window(500, 350, window=play_button)
 caneva.create_window(500, 650, window=curseur)
